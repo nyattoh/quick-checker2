@@ -2,6 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 
+interface Item {
+  name: string;
+  id: number | string;
+  emoji: string;
+  required: boolean;
+}
+
 export default function Home() {
   const [isStarted, setIsStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -10,14 +17,12 @@ export default function Home() {
   const [newItemName, setNewItemName] = useState('');
   const [weather, setWeather] = useState('sunny');
 
-  // 初期値を直接指定
-  const [items, setItems] = useState([
-    { name: '財布', id: 1, emoji: '👛', required: true },
-    { name: '鍵', id: 2, emoji: '🔑', required: true },
-    { name: 'スマートフォン', id: 3, emoji: '📱', required: true },
+  const [items, setItems] = useState<Item[]>([
+    { name: "財布", id: 1, emoji: "👛", required: true },
+    { name: "鍵", id: 2, emoji: "🔑", required: true },
+    { name: "スマートフォン", id: 3, emoji: "📱", required: true }
   ]);
 
-  // LocalStorageの処理は useEffect で行う
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('checklist-items');
@@ -40,54 +45,45 @@ export default function Home() {
         {
           name: newItemName,
           id: Date.now(),
-          emoji: '📦',
-          required: false,
-        },
+          emoji: "📦",
+          required: false
+        }
       ]);
       setNewItemName('');
     }
   };
 
-  const removeItem = (id) => {
-    setItems(items.filter((item) => item.id !== id));
+  const removeItem = (id: number | string) => {
+    setItems(items.filter(item => item.id !== id));
   };
 
-  const toggleRequired = (id) => {
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, required: !item.required } : item
-      )
-    );
+  const toggleRequired = (id: number | string) => {
+    setItems(items.map(item => 
+      item.id === id ? {...item, required: !item.required} : item
+    ));
   };
 
   const updateWeatherItems = () => {
-    if (weather === 'rainy' && !items.some((item) => item.name === '傘')) {
-      setItems([
-        ...items,
-        { name: '傘', id: 'umbrella', emoji: '☔', required: true },
-      ]);
+    if (weather === 'rainy' && !items.some(item => item.name === "傘")) {
+      setItems([...items, { name: "傘", id: 'umbrella', emoji: "☔", required: true }]);
     }
   };
 
   const startChecking = () => {
     updateWeatherItems();
     setIsStarted(true);
-    setMessage(
-      `${items[currentStep].emoji} ${items[currentStep].name}を確認してください`
-    );
+    setMessage(`${items[currentStep].emoji} ${items[currentStep].name}を確認してください`);
   };
 
-  const handleResponse = (isYes) => {
+  const handleResponse = (isYes: boolean) => {
     const currentItem = items[currentStep];
-    setMessage(
-      isYes
-        ? `${currentItem.emoji} OK！`
-        : `${currentItem.emoji} 忘れずに持ちましょう！`
-    );
+    setMessage(isYes ? 
+      `${currentItem.emoji} OK！` : 
+      `${currentItem.emoji} 忘れずに持ちましょう！`);
 
     setTimeout(() => {
       if (currentStep < items.length - 1) {
-        setCurrentStep((prev) => prev + 1);
+        setCurrentStep(prev => prev + 1);
         const nextItem = items[currentStep + 1];
         setMessage(`${nextItem.emoji} ${nextItem.name}を確認してください`);
       } else {
@@ -126,25 +122,19 @@ export default function Home() {
                 {!isStarted && !isEditing && (
                   <div className="flex gap-2 mb-4">
                     <button
-                      className={`p-2 rounded-full ${
-                        weather === 'sunny' ? 'bg-yellow-100' : 'bg-gray-100'
-                      }`}
+                      className={`p-2 rounded-full ${weather === 'sunny' ? 'bg-yellow-100' : 'bg-gray-100'}`}
                       onClick={() => setWeather('sunny')}
                     >
                       ☀️
                     </button>
                     <button
-                      className={`p-2 rounded-full ${
-                        weather === 'cloudy' ? 'bg-gray-200' : 'bg-gray-100'
-                      }`}
+                      className={`p-2 rounded-full ${weather === 'cloudy' ? 'bg-gray-200' : 'bg-gray-100'}`}
                       onClick={() => setWeather('cloudy')}
                     >
                       ☁️
                     </button>
                     <button
-                      className={`p-2 rounded-full ${
-                        weather === 'rainy' ? 'bg-blue-100' : 'bg-gray-100'
-                      }`}
+                      className={`p-2 rounded-full ${weather === 'rainy' ? 'bg-blue-100' : 'bg-gray-100'}`}
                       onClick={() => setWeather('rainy')}
                     >
                       ☔
@@ -170,19 +160,14 @@ export default function Home() {
                       </button>
                     </div>
                     <ul className="space-y-2">
-                      {items.map((item) => (
-                        <li
-                          key={item.id}
-                          className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
-                        >
+                      {items.map(item => (
+                        <li key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                           <span>{item.emoji}</span>
                           <span className="flex-1">{item.name}</span>
                           <button
                             onClick={() => toggleRequired(item.id)}
                             className={`px-2 py-1 rounded ${
-                              item.required
-                                ? 'bg-blue-100 text-blue-600'
-                                : 'bg-gray-100'
+                              item.required ? 'bg-blue-100 text-blue-600' : 'bg-gray-100'
                             }`}
                           >
                             必須
@@ -204,7 +189,7 @@ export default function Home() {
                     {message}
                   </div>
                 )}
-
+                
                 {!isStarted && !isEditing && (
                   <button
                     className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
@@ -218,11 +203,9 @@ export default function Home() {
                   <div className="space-y-4">
                     <div className="p-4 bg-blue-50 rounded-lg text-center">
                       <p className="text-xl mb-2">{items[currentStep].emoji}</p>
-                      <p className="text-lg">
-                        {items[currentStep].name}はありますか？
-                      </p>
+                      <p className="text-lg">{items[currentStep].name}はありますか？</p>
                     </div>
-
+                    
                     <div className="flex gap-2">
                       <button
                         className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
